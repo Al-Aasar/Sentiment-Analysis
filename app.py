@@ -42,6 +42,9 @@ def predict_sentiment(text):
     
     label = labelencoder.inverse_transform([predicted_label_index])
     print("Predicted label:", label[0])
+
+    print("Label classes:", labelencoder.classes_)
+
     
     return label[0]
 
