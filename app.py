@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
 import re
 from tensorflow.keras.preprocessing.text import Tokenizer
@@ -8,62 +7,51 @@ from tensorflow.keras.models import load_model
 from sklearn.preprocessing import LabelEncoder
 import pickle
 
-# ========================
-# تحميل الموديل والـ Tokenizer والـ LabelEncoder (بعد ما تحفظهم من التدريب)
-# ========================
-model = load_model("lstm_model.keras")
-
-with open("tokenizer.pickle", "rb") as f:
+# تحميل النموذج وأدوات المعالجة
+model = load_model('lstm_model.keras')
+with open('tokenizer.pickle', 'rb') as f:
     tokenizer = pickle.load(f)
+with open('labelencoder.pickle', 'rb') as f:
+    labelencoder = pickle.load(f)
 
-with open("label_encoder.pickle", "rb") as f:
-    label_encoder = pickle.load(f)
+maxlen = 50
 
-max_len = 50  # نفس الطول اللي استخدمته في التدريب
-
-# ========================
-# تنظيف النصوص
-# ========================
 def clean_text(text):
     text = re.sub(r"http\S+", "", text)
-    text = re.sub(r"@[A-Za-z0-9_]+", "", text)
-    text = re.sub(r"[^a-zA-Z\s]", "", text)
+    text = re.sub(r"[^a-zA-Z0-9\s]", "", text)
     return text.lower().strip()
 
 def predict_sentiment(text):
-    text = clean_text(text)
-    seq = tokenizer.texts_to_sequences([text])
-    padded = pad_sequences(seq, maxlen=max_len, padding="post")
+    cleaned_text = clean_text(text)
+    seq = tokenizer.texts_to_sequences([cleaned_text])
+    padded = pad_sequences(seq, maxlen=maxlen, padding='post')
     pred = model.predict(padded)
-    label = label_encoder.inverse_transform([np.argmax(pred)])
+    print("Model raw output:", pred)  # لتشخيص النتائج
+    label = labelencoder.inverse_transform([np.argmax(pred)])
     return label[0]
 
-# ========================
-# واجهة Streamlit
-# ========================
-st.title("Sentiment Analysis App 📝")
+st.title("Sentiment Analysis App")
 
-option = st.radio("اختر طريقة الإدخال:", ["اكتب نص", "ارفع ملف CSV"])
+option = st.radio("Choose input method:", ("User Input", "Upload CSV"))
 
-if option == "اكتب نص":
-    user_input = st.text_area("اكتب الجملة هنا:")
-    if st.button("تحليل"):
-        if user_input.strip() != "":
+if option == "User Input":
+    user_input = st.text_area("Enter your text here:")
+    if st.button("Analyze"):
+        if user_input.strip():
             result = predict_sentiment(user_input)
-            st.success(f"التصنيف: {result}")
-
-elif option == "ارفع ملف CSV":
-    file = st.file_uploader("ارفع ملف CSV", type=["csv"])
-    if file is not None:
-        df = pd.read_csv(file)
-        if "Tweet_content" in df.columns:
-            st.write("أول 5 صفوف من البيانات:")
-            st.dataframe(df.head())
-            if st.button("تحليل الملف"):
-                df["Predicted_Sentiment"] = df["Tweet_content"].apply(predict_sentiment)
-                st.success("تم تحليل البيانات ✅")
-                st.dataframe(df.head(20))
-                csv = df.to_csv(index=False).encode("utf-8")
-                st.download_button("تحميل الملف بالنتائج", data=csv, file_name="results.csv", mime="text/csv")
+            st.success(f"Sentiment: {result}")
         else:
-            st.error("لا يوجد عمود اسمه Tweet_content في الملف")
+            st.warning("Please enter some text.")
+
+elif option == "Upload CSV":
+    uploaded_file = st.file_uploader("Upload a CSV file with a column 'text'")
+    if uploaded_file:
+        import pandas as pd
+        df = pd.read_csv(uploaded_file)
+        if 'text' in df.columns:
+            df['Sentiment'] = df['text'].apply(predict_sentiment)
+            st.write(df)
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button(label="Download results as CSV", data=csv, file_name='sentiment_results.csv', mime='text/csv')
+        else:
+            st.warning("CSV must have a 'text' column.")
