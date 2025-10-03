@@ -30,7 +30,7 @@ def clean_text(text):
 def predict_sentiment(text):
     cleaned_text = clean_text(text)
 
-    sequence = tokenizer.texts_to_sequences([cleaned])
+    sequence = tokenizer.texts_to_sequences([cleaned_text])
     padded = pad_sequences(sequence, maxlen=50)
 
     prediction = model.predict(padded)
