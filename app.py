@@ -11,7 +11,7 @@ import pickle
 # ========================
 # تحميل الموديل والـ Tokenizer والـ LabelEncoder (بعد ما تحفظهم من التدريب)
 # ========================
-model = load_model("sentiment_model.h5")
+model = load_model("lstm_model.h5")
 
 with open("tokenizer.pkl", "rb") as f:
     tokenizer = pickle.load(f)
