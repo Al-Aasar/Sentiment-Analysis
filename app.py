@@ -16,9 +16,6 @@ with open('tokenizer.pickle', 'rb') as handle:
 with open('label_encoder.pickle', 'rb') as handle:
     label_encoder = pickle.load(handle)
 
-maxlen = 50
-
-
 def clean_text(text):
     text = re.sub(r"http\S+", "", text)  
     text = re.sub(r"@[A-Za-z0-9_]+", "", text)  
@@ -42,9 +39,9 @@ def predict_sentiment(text):
 
 st.title("Sentiment Analysis App")
 
-option = st.radio("Choose input method:", ("User Input", "Upload CSV"))
+# option = st.radio("Choose input method:", ("User Input", "Upload CSV"))
 
-if option == "User Input":
+# if option == "User Input":
     user_input = st.text_area("Enter your text here:")
     if st.button("Analyze"):
         if user_input.strip():
