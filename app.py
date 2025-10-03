@@ -16,20 +16,36 @@ with open('label_encoder.pickle', 'rb') as f:
 
 maxlen = 50
 
+# دالة تنظيف النص
 def clean_text(text):
     text = re.sub(r"http\S+", "", text)
     text = re.sub(r"[^a-zA-Z0-9\s]", "", text)
     return text.lower().strip()
 
+# دالة التنبؤ مع طباعة تفصيلية
 def predict_sentiment(text):
     cleaned_text = clean_text(text)
+    print("Cleaned text:", cleaned_text)
+    
     seq = tokenizer.texts_to_sequences([cleaned_text])
+    print("Token sequence:", seq)
+    
     padded = pad_sequences(seq, maxlen=maxlen, padding='post')
+    print("Padded sequence shape:", padded.shape)
+    print("Padded sequence:", padded)
+    
     pred = model.predict(padded)
-    print("Model raw output:", pred)  # لتشخيص النتائج
-    label = labelencoder.inverse_transform([np.argmax(pred)])
+    print("Raw model prediction:", pred)
+    
+    predicted_label_index = np.argmax(pred)
+    print("Predicted label index:", predicted_label_index)
+    
+    label = labelencoder.inverse_transform([predicted_label_index])
+    print("Predicted label:", label[0])
+    
     return label[0]
 
+# واجهة المستخدم
 st.title("Sentiment Analysis App")
 
 option = st.radio("Choose input method:", ("User Input", "Upload CSV"))
