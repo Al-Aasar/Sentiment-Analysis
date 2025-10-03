@@ -12,7 +12,7 @@ st.set_page_config(
     layout="centered"
 )
 
-model = load_model("lstm_model.h5")
+model = load_model("lstm_model.keras")
 
 with open("tokenizer.pickle", "rb") as f:
     tokenizer = pickle.load(f)
