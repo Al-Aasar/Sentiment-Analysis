@@ -13,10 +13,10 @@ import pickle
 # ========================
 model = load_model("lstm_model.h5")
 
-with open("tokenizer.pkl", "rb") as f:
+with open("tokenizer.pickle", "rb") as f:
     tokenizer = pickle.load(f)
 
-with open("label_encoder.pkl", "rb") as f:
+with open("label_encoder.pickle", "rb") as f:
     label_encoder = pickle.load(f)
 
 max_len = 50  # نفس الطول اللي استخدمته في التدريب
