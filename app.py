@@ -7,46 +7,37 @@ from tensorflow.keras.models import load_model
 from sklearn.preprocessing import LabelEncoder
 import pickle
 
-# تحميل النموذج وأدوات المعالجة
+
 model = load_model('lstm_model.keras')
-with open('tokenizer.pickle', 'rb') as f:
-    tokenizer = pickle.load(f)
-with open('label_encoder.pickle', 'rb') as f:
-    labelencoder = pickle.load(f)
+
+with open('tokenizer.pickle', 'rb') as handle:
+    tokenizer = pickle.load(handle)
+
+with open('label_encoder.pickle', 'rb') as handle:
+    label_encoder = pickle.load(handle)
 
 maxlen = 50
 
 # دالة تنظيف النص
 def clean_text(text):
-    text = re.sub(r"http\S+", "", text)
-    text = re.sub(r"[^a-zA-Z0-9\s]", "", text)
-    return text.lower().strip()
+    text = re.sub(r"http\S+", "", text)  
+    text = re.sub(r"@[A-Za-z0-9_]+", "", text)  
+    text = re.sub(r"[^a-zA-Z\s]", "", text) 
+    text = text.lower().strip()
+    return text
 
 # دالة التنبؤ مع طباعة تفصيلية
 def predict_sentiment(text):
     cleaned_text = clean_text(text)
-    print("Cleaned text:", cleaned_text)
-    
-    seq = tokenizer.texts_to_sequences([cleaned_text])
-    print("Token sequence:", seq)
-    
-    padded = pad_sequences(seq, maxlen=maxlen, padding='post')
-    print("Padded sequence shape:", padded.shape)
-    print("Padded sequence:", padded)
-    
-    pred = model.predict(padded)
-    print("Raw model prediction:", pred)
-    
-    predicted_label_index = np.argmax(pred)
-    print("Predicted label index:", predicted_label_index)
-    
-    label = labelencoder.inverse_transform([predicted_label_index])
-    print("Predicted label:", label[0])
 
-    print("Label classes:", labelencoder.classes_)
+    sequence = tokenizer.texts_to_sequences([cleaned])
+    padded = pad_sequences(sequence, maxlen=50)
 
+    prediction = model.predict(padded)
+    predicted_class = np.argmax(prediction, axis=1)
+    sentiment = label_encoder.inverse_transform(predicted_class)
     
-    return label[0]
+    return sentiment[0]
 
 # واجهة المستخدم
 st.title("Sentiment Analysis App")
