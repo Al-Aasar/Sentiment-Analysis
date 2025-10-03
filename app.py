@@ -1,92 +1,69 @@
 import streamlit as st
+import pandas as pd
 import numpy as np
 import re
+from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import load_model
+from sklearn.preprocessing import LabelEncoder
 import pickle
 
+# ========================
+# تحميل الموديل والـ Tokenizer والـ LabelEncoder (بعد ما تحفظهم من التدريب)
+# ========================
+model = load_model("sentiment_model.h5")
 
-st.set_page_config(
-    page_title="Sentiment Analysis",
-    page_icon="💬",
-    layout="centered"
-)
-
-model = load_model("lstm_model.keras")
-
-with open("tokenizer.pickle", "rb") as f:
+with open("tokenizer.pkl", "rb") as f:
     tokenizer = pickle.load(f)
 
-with open("label_encoder.pickle", "rb") as f:
+with open("label_encoder.pkl", "rb") as f:
     label_encoder = pickle.load(f)
 
-max_len = 50  
+max_len = 50  # نفس الطول اللي استخدمته في التدريب
 
+# ========================
+# تنظيف النصوص
+# ========================
 def clean_text(text):
     text = re.sub(r"http\S+", "", text)
     text = re.sub(r"@[A-Za-z0-9_]+", "", text)
     text = re.sub(r"[^a-zA-Z\s]", "", text)
     return text.lower().strip()
 
-def predict_sentiment(text, model, tokenizer, label_encoder):
-    cleaned = clean_text(text)
-    seq = tokenizer.texts_to_sequences([cleaned])
+def predict_sentiment(text):
+    text = clean_text(text)
+    seq = tokenizer.texts_to_sequences([text])
     padded = pad_sequences(seq, maxlen=max_len, padding="post")
     pred = model.predict(padded)
-    label_index = np.argmax(pred)
-    sentiment = label_encoder.inverse_transform([label_index])[0]
-    confidence = float(np.max(pred) * 100)
-    probabilities = pred[0]
-    return sentiment, confidence, probabilities
+    label = label_encoder.inverse_transform([np.argmax(pred)])
+    return label[0]
 
-st.title("💬 Sentiment Analysis App")
-st.write("Enter text or a tweet to analyze the sentiment (Positive / Negative / Neutral / Irrelevant)")
+# ========================
+# واجهة Streamlit
+# ========================
+st.title("Sentiment Analysis App 📝")
 
-user_input = st.text_area("Write your text here:",
-        height=150,
-        placeholder="Example: This is an amazing product! I love it.")
+option = st.radio("اختر طريقة الإدخال:", ["اكتب نص", "ارفع ملف CSV"])
 
-if st.button("🔍 Analyze Sentiment", type="primary"):
-    if user_input and user_input.strip():
-        with st.spinner('Analyzing...'):
-            sentiment, confidence, probabilities = predict_sentiment(
-                user_input, model, tokenizer, label_encoder
-            )
-        
-        st.markdown("---")
-        st.subheader("📊 Analysis Results")
-        
-        sentiment_config = {
-            'Positive': {'emoji': '😊', 'color': '#28a745'},
-            'Negative': {'emoji': '😞', 'color': '#dc3545'},
-            'Neutral': {'emoji': '😐', 'color': '#6c757d'},
-            'Irrelevant': {'emoji': '❓', 'color': '#ffc107'}
-        }
-        
-        config = sentiment_config.get(sentiment, {'emoji': '🤔', 'color': '#6c757d'})
-        
-        st.markdown(
-            f"<h2 style='text-align: center; color: {config['color']};'>"
-            f"{config['emoji']} {sentiment}</h2>",
-            unsafe_allow_html=True
-        )
-        
-        st.metric("Confidence Score", f"{confidence:.2f}%")
-        
-        st.subheader("📈 Probability Distribution")
-        
-        prob_data = {}
-        for i, label in enumerate(label_encoder.classes_):
-            prob_data[label] = probabilities[i] * 100
-        
-        sorted_probs = sorted(prob_data.items(), key=lambda x: x[1], reverse=True)
-        
-        for label, prob in sorted_probs:
-            st.progress(float(prob) / 100.0)  
-            st.write(f"**{label}**: {prob:.2f}%")
-        
-        with st.expander("View Cleaned Text"):
-            st.text(clean_text(user_input))
-            
-    else:
-        st.warning("⚠️ Please enter text to analyze")
+if option == "اكتب نص":
+    user_input = st.text_area("اكتب الجملة هنا:")
+    if st.button("تحليل"):
+        if user_input.strip() != "":
+            result = predict_sentiment(user_input)
+            st.success(f"التصنيف: {result}")
+
+elif option == "ارفع ملف CSV":
+    file = st.file_uploader("ارفع ملف CSV", type=["csv"])
+    if file is not None:
+        df = pd.read_csv(file)
+        if "Tweet_content" in df.columns:
+            st.write("أول 5 صفوف من البيانات:")
+            st.dataframe(df.head())
+            if st.button("تحليل الملف"):
+                df["Predicted_Sentiment"] = df["Tweet_content"].apply(predict_sentiment)
+                st.success("تم تحليل البيانات ✅")
+                st.dataframe(df.head(20))
+                csv = df.to_csv(index=False).encode("utf-8")
+                st.download_button("تحميل الملف بالنتائج", data=csv, file_name="results.csv", mime="text/csv")
+        else:
+            st.error("لا يوجد عمود اسمه Tweet_content في الملف")
