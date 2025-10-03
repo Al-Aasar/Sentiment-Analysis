@@ -82,7 +82,7 @@ if st.button("🔍 Analyze Sentiment", type="primary"):
         sorted_probs = sorted(prob_data.items(), key=lambda x: x[1], reverse=True)
         
         for label, prob in sorted_probs:
-            st.progress(prob / 100)
+            st.progress(float(prob) / 100.0)  
             st.write(f"**{label}**: {prob:.2f}%")
         
         with st.expander("View Cleaned Text"):
