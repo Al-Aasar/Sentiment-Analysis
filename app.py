@@ -3,15 +3,15 @@ import pandas as pd
 import numpy as np
 import re
 from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.sequence import padsequences
+from tensorflow.keras.models import loadmodel
 from sklearn.preprocessing import LabelEncoder
 import pickle
 
 # ========================
 # تحميل الموديل والـ Tokenizer والـ LabelEncoder (بعد ما تحفظهم من التدريب)
 # ========================
-model = load_model("lstm_model.keras")
+model = loadmodel("lstm_model.keras")
 
 with open("tokenizer.pickle", "rb") as f:
     tokenizer = pickle.load(f)
@@ -33,7 +33,7 @@ def clean_text(text):
 def predict_sentiment(text):
     text = clean_text(text)
     seq = tokenizer.texts_to_sequences([text])
-    padded = pad_sequences(seq, maxlen=max_len, padding="post")
+    padded = padsequences(seq, maxlen=max_len, padding="post")
     pred = model.predict(padded)
     label = label_encoder.inverse_transform([np.argmax(pred)])
     return label[0]
