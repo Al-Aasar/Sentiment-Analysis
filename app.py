@@ -39,9 +39,9 @@ def predict_sentiment(text):
 
 st.title("Sentiment Analysis App")
 
-# option = st.radio("Choose input method:", ("User Input", "Upload CSV"))
+option = st.radio("Choose input method:", ("User Input"))
 
-# if option == "User Input":
+if option == "User Input":
     user_input = st.text_area("Enter your text here:")
     if st.button("Analyze"):
         if user_input.strip():
