@@ -39,13 +39,11 @@ def predict_sentiment(text):
 
 st.title("Sentiment Analysis App")
 
-option = st.radio("Choose input method:", ("User Input"))
+user_input = st.text_area("Enter your text here:")
 
-if option == "User Input":
-    user_input = st.text_area("Enter your text here:")
-    if st.button("Analyze"):
-        if user_input.strip():
-            result = predict_sentiment(user_input)
-            st.success(f"Sentiment: {result}")
-        else:
-            st.warning("Please enter some text.")
+if st.button("Analyze"):
+    if user_input.strip():
+        result = predict_sentiment(user_input)
+        st.success(f"Sentiment: {result}")
+    else:
+        st.warning("Please enter some text.")
