@@ -18,7 +18,7 @@ with open('label_encoder.pickle', 'rb') as handle:
 
 maxlen = 50
 
-# دالة تنظيف النص
+
 def clean_text(text):
     text = re.sub(r"http\S+", "", text)  
     text = re.sub(r"@[A-Za-z0-9_]+", "", text)  
@@ -26,7 +26,7 @@ def clean_text(text):
     text = text.lower().strip()
     return text
 
-# دالة التنبؤ مع طباعة تفصيلية
+
 def predict_sentiment(text):
     cleaned_text = clean_text(text)
 
@@ -39,7 +39,7 @@ def predict_sentiment(text):
     
     return sentiment[0]
 
-# واجهة المستخدم
+
 st.title("Sentiment Analysis App")
 
 option = st.radio("Choose input method:", ("User Input", "Upload CSV"))
@@ -52,16 +52,3 @@ if option == "User Input":
             st.success(f"Sentiment: {result}")
         else:
             st.warning("Please enter some text.")
-
-elif option == "Upload CSV":
-    uploaded_file = st.file_uploader("Upload a CSV file with a column 'text'")
-    if uploaded_file:
-        import pandas as pd
-        df = pd.read_csv(uploaded_file)
-        if 'text' in df.columns:
-            df['Sentiment'] = df['text'].apply(predict_sentiment)
-            st.write(df)
-            csv = df.to_csv(index=False).encode('utf-8')
-            st.download_button(label="Download results as CSV", data=csv, file_name='sentiment_results.csv', mime='text/csv')
-        else:
-            st.warning("CSV must have a 'text' column.")
