@@ -11,7 +11,7 @@ import pickle
 model = load_model('lstm_model.keras')
 with open('tokenizer.pickle', 'rb') as f:
     tokenizer = pickle.load(f)
-with open('labelencoder.pickle', 'rb') as f:
+with open('label_encoder.pickle', 'rb') as f:
     labelencoder = pickle.load(f)
 
 maxlen = 50
