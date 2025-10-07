@@ -7,7 +7,7 @@ from tensorflow.keras.models import load_model
 from sklearn.preprocessing import LabelEncoder
 import pickle
 
-model = load_model('lstm_model.keras')
+model = load_model('lstm_model.keras', compile=False)
 
 with open('tokenizer.pickle', 'rb') as handle:
     tokenizer = pickle.load(handle)
