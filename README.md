@@ -35,7 +35,7 @@ The LSTM model was trained on text data to classify sentiment and deployed throu
 ---
 
 
-## 📦 sentiment-analysis-app
+## 📂 Project Structure
 
 ```
 Sentiment-Analysis/
