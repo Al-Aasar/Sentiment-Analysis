@@ -7,7 +7,9 @@ from tensorflow.keras.models import load_model
 from sklearn.preprocessing import LabelEncoder
 import pickle
 
-
+# ---------------------------
+# Load Model and Tokenizer
+# ---------------------------
 model = load_model('lstm_model.keras')
 
 with open('tokenizer.pickle', 'rb') as handle:
@@ -16,34 +18,60 @@ with open('tokenizer.pickle', 'rb') as handle:
 with open('label_encoder.pickle', 'rb') as handle:
     label_encoder = pickle.load(handle)
 
+
+# ---------------------------
+# Text Cleaning
+# ---------------------------
 def clean_text(text):
-    text = re.sub(r"http\S+", "", text)  
-    text = re.sub(r"@[A-Za-z0-9_]+", "", text)  
-    text = re.sub(r"[^a-zA-Z\s]", "", text) 
+    text = re.sub(r"http\S+", "", text)
+    text = re.sub(r"@[A-Za-z0-9_]+", "", text)
+    text = re.sub(r"[^a-zA-Z\s]", "", text)
     text = text.lower().strip()
     return text
 
 
+# ---------------------------
+# Prediction Function
+# ---------------------------
 def predict_sentiment(text):
     cleaned_text = clean_text(text)
-
     sequence = tokenizer.texts_to_sequences([cleaned_text])
     padded = pad_sequences(sequence, maxlen=50)
-
     prediction = model.predict(padded)
     predicted_class = np.argmax(prediction, axis=1)
     sentiment = label_encoder.inverse_transform(predicted_class)
-    
     return sentiment[0]
 
 
-st.title("Sentiment Analysis App")
+# ---------------------------
+# Streamlit UI
+# ---------------------------
+st.set_page_config(page_title="Sentiment Analysis", page_icon="💬", layout="centered")
 
-user_input = st.text_area("Enter your text here:")
+st.title("💬 Sentiment Analysis App")
+st.markdown("### Analyze the sentiment of any text!")
 
-if st.button("Analyze"):
+user_input = st.text_area("📝 Enter your text here:")
+
+if st.button("🔍 Analyze"):
     if user_input.strip():
         result = predict_sentiment(user_input)
-        st.success(f"Sentiment: {result}")
+
+        # Define colors based on sentiment
+        color_map = {
+            "positive": "green",
+            "negative": "red",
+            "neutral": "gray",
+            "irrelevant": "orange"
+        }
+
+        sentiment_lower = result.lower()
+        color = color_map.get(sentiment_lower, "blue")
+
+        st.markdown(
+            f"<h3 style='text-align:center; color:{color};'>Sentiment: {result.capitalize()}</h3>",
+            unsafe_allow_html=True
+        )
+
     else:
-        st.warning("Please enter some text.")
+        st.warning("⚠️ Please enter some text before analyzing.")
