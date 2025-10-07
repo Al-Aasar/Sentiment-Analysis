@@ -7,9 +7,6 @@ from tensorflow.keras.models import load_model
 from sklearn.preprocessing import LabelEncoder
 import pickle
 
-# ---------------------------
-# Load Model and Tokenizer
-# ---------------------------
 model = load_model('lstm_model.keras')
 
 with open('tokenizer.pickle', 'rb') as handle:
@@ -19,9 +16,7 @@ with open('label_encoder.pickle', 'rb') as handle:
     label_encoder = pickle.load(handle)
 
 
-# ---------------------------
-# Text Cleaning
-# ---------------------------
+
 def clean_text(text):
     text = re.sub(r"http\S+", "", text)
     text = re.sub(r"@[A-Za-z0-9_]+", "", text)
@@ -30,9 +25,6 @@ def clean_text(text):
     return text
 
 
-# ---------------------------
-# Prediction Function
-# ---------------------------
 def predict_sentiment(text):
     cleaned_text = clean_text(text)
     sequence = tokenizer.texts_to_sequences([cleaned_text])
@@ -43,9 +35,7 @@ def predict_sentiment(text):
     return sentiment[0]
 
 
-# ---------------------------
-# Streamlit UI
-# ---------------------------
+
 st.set_page_config(page_title="Sentiment Analysis", page_icon="💬", layout="centered")
 
 st.title("💬 Sentiment Analysis App")
