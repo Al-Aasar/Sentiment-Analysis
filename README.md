@@ -45,3 +45,10 @@ Sentiment-Analysis/
 │── tokenizer.pickle              
 │── label_encoder.pickle          
 ```
+
+## 👨‍💻 Author
+
+**Muhammad Al-Aasar**  
+🎓 B.Sc. in Computer Science, Tanta University  
+🔗 [LinkedIn Profile](https://www.linkedin.com/in/muhammad-al-aasar-455b78329)  
+📞 +20 1015088811
