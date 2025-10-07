@@ -34,15 +34,14 @@ The LSTM model was trained on text data to classify sentiment and deployed throu
 
 ---
 
+
 ## 📦 sentiment-analysis-app
 
----
-
+```
 Sentiment-Analysis/
-├── app.py
-├── lstm_model.keras
-├── tokenizer.pickle
-├── label_encoder.pickle
-├── requirements.txt
-└── README.md
----
+│── app.py                # Streamlit application
+│── requirements.txt       # Python dependencies
+│── lstm_model.keras          
+│── tokenizer.pickle              
+│── label_encoder.pickle          
+```
